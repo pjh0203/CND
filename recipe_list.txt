@@ -1,2 +1,2 @@
-Slashdot.org
+example.recipe
 economist.recipe
