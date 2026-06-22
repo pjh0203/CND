@@ -1,2 +1,1 @@
-economist.recipe
-example.recipe
+The New Yorker (All Articles)
