@@ -1,2 +1,2 @@
-example.recipe
 economist.recipe
+example.recipe
