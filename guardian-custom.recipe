@@ -11,7 +11,7 @@ class GuardianCustom(BasicNewsRecipe):
                    'plus rich football and culture coverage. Built from RSS.')
     language = 'en_GB'
     publication_type = 'newspaper'
-    oldest_article = 2            # only the last 2 days
+    oldest_article = 1            # newspaper: today's news only
     max_articles_per_feed = 18    # cap per section (lower this if file too big)
     no_stylesheets = True
     remove_javascript = True
@@ -29,23 +29,17 @@ class GuardianCustom(BasicNewsRecipe):
         ('World', 'https://www.theguardian.com/world/rss'),
         ('Europe', 'https://www.theguardian.com/world/europe-news/rss'),
         ('US news', 'https://www.theguardian.com/us-news/rss'),
-        ('UK politics', 'https://www.theguardian.com/politics/rss'),
         ('Business', 'https://www.theguardian.com/business/rss'),
         ('Economics', 'https://www.theguardian.com/business/economics/rss'),
         ('Technology', 'https://www.theguardian.com/technology/rss'),
         ('Environment', 'https://www.theguardian.com/environment/rss'),
         ('Science', 'https://www.theguardian.com/science/rss'),
         ('Opinion', 'https://www.theguardian.com/commentisfree/rss'),
-        # --- Football (kept rich) ---
+        # --- Football ---
         ('Football', 'https://www.theguardian.com/football/rss'),
-        # --- Culture (kept rich) ---
-        ('Culture', 'https://www.theguardian.com/culture/rss'),
-        ('Film', 'https://www.theguardian.com/film/rss'),
-        ('Music', 'https://www.theguardian.com/music/rss'),
+        # --- Culture ---
         ('Books', 'https://www.theguardian.com/books/rss'),
         ('Art & design', 'https://www.theguardian.com/artanddesign/rss'),
-        ('TV & radio', 'https://www.theguardian.com/tv-and-radio/rss'),
-        ('Games', 'https://www.theguardian.com/games/rss'),
     ]
 
     # Skip Guardian live blogs / rolling coverage. These are single giant

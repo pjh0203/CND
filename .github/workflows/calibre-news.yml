@@ -1,12 +1,20 @@
 name: Calibre News Delivery
-run-name: 'Calibre News Delivery: ${{ github.ref_name }}'
+run-name: 'Calibre News Delivery: ${{ inputs.recipe_list }}'
 
 on:
+  workflow_call:
+    inputs:
+      recipe_list:
+        description: 'Recipe list file to process'
+        required: true
+        type: string
   workflow_dispatch:
-  schedule:
-    - cron: '0 0 * * *'
-  # push:
-  #   branches: ['master']
+    inputs:
+      recipe_list:
+        description: 'Recipe list file to process'
+        required: true
+        default: recipe_daily.txt
+        type: string
 
 permissions:
   contents: read
@@ -19,6 +27,7 @@ jobs:
       output: converted_ebooks
       publisher: bookfere.com
       author: Calibre News Delivery
+      recipe_list: ${{ inputs.recipe_list }}
       relay: ${{ secrets.SMTP }}
       port: ${{ secrets.PORT }}
       encrypt: ${{ secrets.ENCRYPT }}
@@ -67,23 +76,25 @@ jobs:
             local key=$(echo "$name" | md5sum | cut -d ' ' -f 1)
             recipe_paths[$key]="$recipe_path"
           }
-          if [ -f 'recipe_list.txt' ]; then
-            while read recipe_path || [ -n "$recipe_path" ]; do
-              if [ ! -n "$recipe_path" ]; then continue; fi
-              title="${recipe_path%.recipe}"
-              result="$(ebook-convert --list-recipes | grep "$title" || true)"
-              if [ ! -n "$result" ]; then
-                echo "Recipe \"$recipe_path\" does not exists"; continue
-              fi
-              if [ "${recipe_path##*.}" != 'recipe' ]; then
-                recipe_path="$recipe_path".recipe
-              fi
-              add_recipe
-            done < recipe_list.txt
+          if [ ! -f "$recipe_list" ]; then
+            echo "Recipe list \"$recipe_list\" not found"; exit 1
           fi
-          while read -d '' recipe_path; do
+          while read recipe_path || [ -n "$recipe_path" ]; do
+            if [ ! -n "$recipe_path" ]; then continue; fi
+            case "$recipe_path" in \#*) continue;; esac
+            # A local .recipe file in the repo: use it directly.
+            if [ -f "$recipe_path" ]; then add_recipe; continue; fi
+            # Otherwise treat the line as a calibre built-in recipe title.
+            title="${recipe_path%.recipe}"
+            result="$(ebook-convert --list-recipes | grep -F "$title" || true)"
+            if [ ! -n "$result" ]; then
+              echo "Recipe \"$recipe_path\" does not exists"; continue
+            fi
+            if [ "${recipe_path##*.}" != 'recipe' ]; then
+              recipe_path="$recipe_path".recipe
+            fi
             add_recipe
-          done < <(find . -maxdepth 1 -type f -name '*.recipe' -print0)
+          done < "$recipe_list"
           for key in ${!recipe_paths[@]}; do
             recipe_path="${recipe_paths[$key]}"
             echo "Recipe path: $recipe_path"

@@ -10,7 +10,7 @@ Leverages GitHub Actions to schedule Calibre to send news via email.
 
 ## Shortcut
 
- __[Upload Recipe](../../upload/master)__ | __[Add Built-in Recipe](../../edit/master/recipe_list.txt)__ | __[Update Schedule](../../edit/master/.github/workflows/calibre-news.yml)__ | __[Workflow](../../actions/workflows/calibre-news.yml)__ | __[Environments](../../settings/environments)__ | [Enable/Disable](../../settings/actions) | [Destroy](../../settings#danger-zone)
+ __[Upload Recipe](../../upload/master)__ | __[Daily List](../../edit/master/recipe_daily.txt)__ | __[Weekly List](../../edit/master/recipe_weekly.txt)__ | __[Daily Workflow](../../actions/workflows/daily.yml)__ | __[Weekly Workflow](../../actions/workflows/weekly.yml)__ | __[Environments](../../settings/environments)__ | [Enable/Disable](../../settings/actions) | [Destroy](../../settings#danger-zone)
 
 ## Setup
 
@@ -40,19 +40,25 @@ Normally, you may receive two example ebooks sent from your project.
 
 ## Schedule
 
-The default delivery is scheduled to occur daily at midnight (00:00) UTC. You can change it according to your preference. The cron expression `- cron: '0 0 * * *'` can be found in the workflow file located at:
+Delivery is split into two independent workflows, each driven by its own cron and recipe list:
 
-```
-/.github/workflows/calibre-news.yml
-```
+| Workflow | Default cron | Recipe list |
+|---|---|---|
+| __[Daily Delivery](../../actions/workflows/daily.yml)__ (`/.github/workflows/daily.yml`) | `0 0 * * *` (daily, 00:00 UTC) | `recipe_daily.txt` |
+| __[Weekly Delivery](../../actions/workflows/weekly.yml)__ (`/.github/workflows/weekly.yml`) | `0 0 * * 1` (Mondays, 00:00 UTC) | `recipe_weekly.txt` |
 
-Please refer to the "__[schedule](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule)__" documentation to specify an appropriate time. For example, if you are in a timezone that is UTC+8 and want the delivery to start at 6:00 AM every day, you can set the cron expression as `0 22 * * *`, calculated using the formula `UTC Time = Local Time − Offset`.
+Both call the shared, reusable workflow `/.github/workflows/calibre-news.yml`, which does the actual conversion and sending.
 
-Additionally, you can manually trigger the delivery on the "__[Actions](../../actions)__" page of your project.
+Please refer to the "__[schedule](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule)__" documentation to specify an appropriate time. For example, if you are in a timezone that is UTC+8 and want a delivery to start at 6:00 AM, set the cron expression to `0 22 * * *`, calculated using the formula `UTC Time = Local Time − Offset`.
+
+Additionally, you can manually trigger either workflow on the "__[Actions](../../actions)__" page of your project.
 
 ## Recipe
 
-For the built-in recipes, you need to add their titles (found in the `Title` attribute of the recipe file) to the plain text file __[recipe_list.txt](recipe_list.txt)__, one title per line. For manually written recipes, simply place them in the root of the project.
+Each workflow processes only the recipes listed in its recipe list file (`recipe_daily.txt` or `recipe_weekly.txt`). Add one entry per line:
+
+* __Built-in recipes__: add the recipe title (found in the `Title` attribute of the recipe file), e.g. `The Diplomat`.
+* __Custom recipes__: place the `.recipe` file in the root of the project and reference it by filename, e.g. `guardian-custom.recipe`.
 
 You can specify the cover and style for a recipe. Place the cover image in the "__covers__" folder and the style file in the "__styles__" folder. Both filenames must match the corresponding recipe title or filename. Be aware that the style may be ignored by the Send to Kindle service.
 

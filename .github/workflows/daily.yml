@@ -1,0 +1,17 @@
+name: Daily Delivery (Guardian, NYT)
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 00:00 UTC every day. Adjust with: UTC = Local - Offset (UTC+8 06:00 -> '0 22 * * *')
+    - cron: '0 0 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  deliver:
+    uses: ./.github/workflows/calibre-news.yml
+    with:
+      recipe_list: recipe_daily.txt
+    secrets: inherit

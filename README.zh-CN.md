@@ -10,7 +10,7 @@
 
 ## 快捷入口
 
- __[上传 Recipe](../../upload/master)__ | __[添加内置 Recipe](../../edit/master/recipe_list.txt)__ | __[更新定时](../../edit/master/.github/workflows/calibre-news.yml)__ | __[工作流](../../actions/workflows/calibre-news.yml)__ | __[环境变量](../../settings/environments)__ | [开启/关闭](../../settings/actions) | [删除](../../settings#danger-zone)
+ __[上传 Recipe](../../upload/master)__ | __[日更清单](../../edit/master/recipe_daily.txt)__ | __[周更清单](../../edit/master/recipe_weekly.txt)__ | __[日更工作流](../../actions/workflows/daily.yml)__ | __[周更工作流](../../actions/workflows/weekly.yml)__ | __[环境变量](../../settings/environments)__ | [开启/关闭](../../settings/actions) | [删除](../../settings#danger-zone)
 
 ## 使用说明
 

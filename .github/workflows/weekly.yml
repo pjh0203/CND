@@ -1,0 +1,17 @@
+name: Weekly Delivery (Magazines, Economist)
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 00:00 UTC every Monday.
+    - cron: '0 0 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  deliver:
+    uses: ./.github/workflows/calibre-news.yml
+    with:
+      recipe_list: recipe_weekly.txt
+    secrets: inherit
