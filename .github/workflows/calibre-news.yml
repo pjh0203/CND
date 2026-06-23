@@ -1,6 +1,8 @@
 name: Calibre News Delivery
 run-name: 'Calibre News Delivery: ${{ inputs.recipe_list }}'
 
+# Reusable engine only: runs solely when called by daily.yml / weekly.yml.
+# No schedule and no workflow_dispatch, so it never runs on its own.
 on:
   workflow_call:
     inputs:
@@ -10,18 +12,6 @@ on:
         type: string
       audience:
         description: "'news' -> secrets.TO_NEWS (e.g. iPad/email); anything else -> secrets.TO (e.g. Kindle)"
-        required: false
-        default: magazine
-        type: string
-  workflow_dispatch:
-    inputs:
-      recipe_list:
-        description: 'Recipe list file to process'
-        required: true
-        default: recipe_daily.txt
-        type: string
-      audience:
-        description: "'news' -> secrets.TO_NEWS; anything else -> secrets.TO"
         required: false
         default: magazine
         type: string
