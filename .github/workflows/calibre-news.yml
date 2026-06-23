@@ -102,7 +102,7 @@ jobs:
             ebook_name="${recipe_path%.*}"
             ebook_path="$ebook_name.${ext,,}"
             echo "Converting \"$recipe_path\" > \"$ebook_path\"..."
-            arguments="--authors=\"$author\" --publisher=\"$publisher\""
+            arguments="--authors=\"$author\" --publisher=\"$publisher\" --flow-size=300"
             cover="covers/${ebook_name}.png"
             if [ -f "$cover" ]; then arguments+=" --cover=\"$cover\""; fi
             style="styles/${ebook_name}.css"
