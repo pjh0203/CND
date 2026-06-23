@@ -1,2 +1,1 @@
 guardian-custom.recipe
-nyt-custom.recipe

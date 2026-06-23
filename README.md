@@ -22,7 +22,8 @@ Leverages GitHub Actions to schedule Calibre to send news via email.
 |Name|Required|Description|Example|
 |---|---|---|---|
 |FROM|Yes|Your email address|xxx@gmail.com|
-|TO|Yes|Destination email address|xxx@kindle.com|
+|TO|Yes|Destination for the weekly (magazine) delivery|xxx@kindle.com|
+|TO_NEWS|No|Destination for the daily (news) delivery; falls back to TO if unset|xxx@gmail.com|
 |ENCRYPT|Yes|SMTP encryption method|SSL|
 |SECRET|Yes|SMTP password|xxxxxxxxxx|
 |SMTP|Yes|SMTP server|smtp.gmail.com|
@@ -42,10 +43,12 @@ Normally, you may receive two example ebooks sent from your project.
 
 Delivery is split into two independent workflows, each driven by its own cron and recipe list:
 
-| Workflow | Default cron | Recipe list |
-|---|---|---|
-| __[Daily Delivery](../../actions/workflows/daily.yml)__ (`/.github/workflows/daily.yml`) | `0 0 * * *` (daily, 00:00 UTC) | `recipe_daily.txt` |
-| __[Weekly Delivery](../../actions/workflows/weekly.yml)__ (`/.github/workflows/weekly.yml`) | `0 0 * * 1` (Mondays, 00:00 UTC) | `recipe_weekly.txt` |
+| Workflow | Default cron | Recipe list | Sent to |
+|---|---|---|---|
+| __[Daily Delivery](../../actions/workflows/daily.yml)__ (`/.github/workflows/daily.yml`) | `0 0 * * *` (daily, 00:00 UTC) | `recipe_daily.txt` | `TO_NEWS` (e.g. a normal inbox you read on iPad/phone) |
+| __[Weekly Delivery](../../actions/workflows/weekly.yml)__ (`/.github/workflows/weekly.yml`) | `0 0 * * 1` (Mondays, 00:00 UTC) | `recipe_weekly.txt` | `TO` (e.g. your `@kindle.com`) |
+
+Newspapers (e.g. The Guardian) read fine as plain EPUB and are routed to `TO_NEWS` to avoid the "Send to Kindle" server-side conversion (which can fail with error E999 on large, image-heavy issues). Magazines keep going to `TO` / Kindle.
 
 Both call the shared, reusable workflow `/.github/workflows/calibre-news.yml`, which does the actual conversion and sending.
 

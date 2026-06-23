@@ -8,12 +8,22 @@ on:
         description: 'Recipe list file to process'
         required: true
         type: string
+      audience:
+        description: "'news' -> secrets.TO_NEWS (e.g. iPad/email); anything else -> secrets.TO (e.g. Kindle)"
+        required: false
+        default: magazine
+        type: string
   workflow_dispatch:
     inputs:
       recipe_list:
         description: 'Recipe list file to process'
         required: true
         default: recipe_daily.txt
+        type: string
+      audience:
+        description: "'news' -> secrets.TO_NEWS; anything else -> secrets.TO"
+        required: false
+        default: magazine
         type: string
 
 permissions:
@@ -33,7 +43,8 @@ jobs:
       encrypt: ${{ secrets.ENCRYPT }}
       secret: ${{ secrets.SECRET }}
       from: ${{ secrets.FROM }}
-      to: ${{ secrets.TO }}
+      # Route by audience: daily news -> TO_NEWS (iPad/email), magazines -> TO (Kindle).
+      to: ${{ inputs.audience == 'news' && secrets.TO_NEWS || secrets.TO }}
       ext: ${{ secrets.FORMAT || 'epub' }}
       size: ${{ secrets.SIZE || 25 }}
     steps:
