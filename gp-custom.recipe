@@ -1,0 +1,34 @@
+#!/usr/bin/env python
+# Custom Goteborgs-Posten (GP) recipe for CND.
+# RSS-based, single combined feed (gp.se exposes only one /rss feed; the old
+# per-section feeds are dead). Swedish-language daily newspaper.
+#
+# NOTE: Most GP articles are paywalled (Premium). Free scraping yields headline
+# + the RSS summary; full body text outside free articles will be truncated.
+from calibre.web.feeds.news import BasicNewsRecipe
+
+
+class GoteborgsPostenCustom(BasicNewsRecipe):
+    title = 'Goteborgs-Posten (Custom)'
+    __author__ = 'Harry'
+    description = ('Goteborgs-Posten: Gothenburg, Sweden and world news, sport, '
+                   'economy and culture. Built from the gp.se RSS feed. Most full '
+                   'text is paywalled, so expect headlines + summaries.')
+    language = 'sv'
+    publication_type = 'newspaper'
+    oldest_article = 1            # newspaper: today's news only
+    max_articles_per_feed = 40    # single feed, so allow more through
+    no_stylesheets = True
+    remove_javascript = True
+    auto_cleanup = True           # generic full-text extraction; robust to redesigns
+    ignore_duplicate_articles = {'title', 'url'}
+    remove_empty_feeds = True
+
+    # Keep the EPUB under the 25 MB email limit: shrink + compress images.
+    compress_news_images = True
+    compress_news_images_max_size = 12   # KB per image
+    scale_news_images = (600, 700)       # max width x height in px
+
+    feeds = [
+        ('Goteborgs-Posten', 'https://www.gp.se/rss'),
+    ]
