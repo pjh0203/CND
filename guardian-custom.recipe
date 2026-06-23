@@ -11,7 +11,6 @@ class GuardianCustom(BasicNewsRecipe):
                    'plus rich football and culture coverage. Built from RSS.')
     language = 'en_GB'
     publication_type = 'newspaper'
-
     oldest_article = 2            # only the last 2 days
     max_articles_per_feed = 18    # cap per section (lower this if file too big)
     no_stylesheets = True
@@ -48,3 +47,30 @@ class GuardianCustom(BasicNewsRecipe):
         ('TV & radio', 'https://www.theguardian.com/tv-and-radio/rss'),
         ('Games', 'https://www.theguardian.com/games/rss'),
     ]
+
+    # Skip Guardian live blogs / rolling coverage. These are single giant
+    # DOM pages that calibre cannot split, and they crash the whole EPUB
+    # (SplitError: "Could not find reasonable point at which to split").
+    def is_live_blog(self, article):
+        url = (article.url or '').lower()
+        title = (article.title or '').lower()
+        if '/live/' in url:
+            return True
+        live_markers = (
+            '– live',          # en-dash variant (Guardian's default)
+            '- live',          # hyphen variant
+            'live –',
+            'live -',
+            'as it happened',
+            'as it happens',
+        )
+        return any(marker in title for marker in live_markers)
+
+    def parse_feeds(self):
+        feeds = super().parse_feeds()
+        for feed in feeds:
+            for article in list(feed.articles):
+                if self.is_live_blog(article):
+                    self.log('Skipping live blog:', article.title)
+                    feed.articles.remove(article)
+        return feeds
