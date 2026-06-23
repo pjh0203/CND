@@ -32,12 +32,23 @@ Leverages GitHub Actions to schedule Calibre to send news via email.
 |SIZE|No|Attachment size limit (default is 25MB)|25|
 |DAYS|No|Ebooks retention period (default is 90 days)|90|
 
-5) Navigate to "__[Actions](../../actions)__" and click [ __Calibre News Delivery__ > __Run workflow__ ] to test.
+5) Navigate to "__[Actions](../../actions)__" and run __Daily Delivery__ (or __Weekly Delivery__) via __Run workflow__ to test.
 
-Normally, you may receive two example ebooks sent from your project.
+Normally, you will receive the converted ebooks at the matching address (`TO_NEWS` for daily, `TO` for weekly).
 
 > [!TIP]
 > 📹 A Brief Tour Video: [https://youtu.be/sIFsoztF58A](https://youtu.be/sIFsoztF58A)
+
+## This fork at a glance
+
+This fork splits delivery by cadence and routes each to a device that reads it best:
+
+| Cadence | Sources | Recipe list | Delivered to |
+|---|---|---|---|
+| __Daily__ | The Guardian (custom RSS recipe, today's news only) | `recipe_daily.txt` | `TO_NEWS` — a normal inbox, read on iPad/phone in Apple Books |
+| __Weekly__ (Mon) | New York Review of Books, The Diplomat, Nautilus, The Economist (custom RSS recipe) | `recipe_weekly.txt` | `TO` — your Kindle (`@kindle.com`) |
+
+Newspapers go to email/Apple Books to dodge the Send-to-Kindle E999 conversion error on large issues. The Economist is a best-effort free digest (most full text is paywalled, so expect headlines + summaries outside the free sections).
 
 ## Schedule
 
