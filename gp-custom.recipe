@@ -1,28 +1,41 @@
 #!/usr/bin/env python
-# Custom Goteborgs-Posten (GP) recipe for CND.
-# RSS-based, single combined feed (gp.se exposes only one /rss feed; the old
-# per-section feeds are dead). Swedish-language daily newspaper.
+# Custom Goteborgs-Posten (GP) recipe for CND, translated Swedish -> Chinese.
 #
-# NOTE: Most GP articles are paywalled (Premium). Free scraping yields headline
-# + the RSS summary; full body text outside free articles will be truncated.
+# GP exposes only one combined /rss feed (the old per-section feeds are dead)
+# and most full text is paywalled. So instead of scraping article pages (which
+# return paywall stubs), we use the RSS summary as the article body
+# (use_embedded_content) and translate title + summary into Chinese.
+#
+# Translation: unofficial Google endpoint (no API key, best-effort). On any
+# failure it falls back to the original Swedish text, so a flaky translate
+# call never breaks the build.
+import json
+from urllib.parse import quote
+from urllib.request import urlopen, Request
+
 from calibre.web.feeds.news import BasicNewsRecipe
 
 
 class GoteborgsPostenCustom(BasicNewsRecipe):
     title = 'Goteborgs-Posten (Custom)'
     __author__ = 'Harry'
-    description = ('Goteborgs-Posten: Gothenburg, Sweden and world news, sport, '
-                   'economy and culture. Built from the gp.se RSS feed. Most full '
-                   'text is paywalled, so expect headlines + summaries.')
-    language = 'sv'
+    description = ('Goteborgs-Posten, translated to Chinese. Gothenburg, Sweden '
+                   'and world news, sport, economy and culture, built from the '
+                   'gp.se RSS feed. Title + summary only (full text is paywalled).')
+    language = 'zh'               # output is Chinese
     publication_type = 'newspaper'
     oldest_article = 1            # newspaper: today's news only
-    max_articles_per_feed = 40    # single feed, so allow more through
+    max_articles_per_feed = 40
     no_stylesheets = True
     remove_javascript = True
-    auto_cleanup = True           # generic full-text extraction; robust to redesigns
     ignore_duplicate_articles = {'title', 'url'}
     remove_empty_feeds = True
+
+    # Use the RSS summary as the body: no page fetch, no paywall stubs, and a
+    # small, stable amount of text to translate.
+    use_embedded_content = True
+    # Be gentle with the free translate endpoint.
+    simultaneous_downloads = 1
 
     # Keep the EPUB under the 25 MB email limit: shrink + compress images.
     compress_news_images = True
@@ -32,3 +45,47 @@ class GoteborgsPostenCustom(BasicNewsRecipe):
     feeds = [
         ('Goteborgs-Posten', 'https://www.gp.se/rss'),
     ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._tr_cache = {}
+
+    def _translate(self, text, _sl='sv', _tl='zh-CN'):
+        text = (text or '').strip()
+        if not text:
+            return text
+        if text in self._tr_cache:
+            return self._tr_cache[text]
+        out = text
+        try:
+            url = ('https://translate.googleapis.com/translate_a/single'
+                   '?client=gtx&sl=%s&tl=%s&dt=t&q=%s' % (_sl, _tl, quote(text)))
+            req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+            raw = urlopen(req, timeout=20).read().decode('utf-8')
+            data = json.loads(raw)
+            out = ''.join(seg[0] for seg in data[0] if seg and seg[0]) or text
+        except Exception as e:
+            self.log('GP translate failed (%r): %s' % (text[:40], e))
+        self._tr_cache[text] = out
+        return out
+
+    def parse_feeds(self):
+        # Translate the headline shown in the TOC / article heading.
+        feeds = super().parse_feeds()
+        for feed in feeds:
+            for article in feed.articles:
+                article.title = self._translate(article.title)
+        return feeds
+
+    def preprocess_html(self, soup):
+        # Translate the (embedded) summary body, text node by text node.
+        from calibre.ebooks.BeautifulSoup import NavigableString
+        for node in list(soup.findAll(text=True)):
+            if not isinstance(node, NavigableString):
+                continue
+            parent = getattr(node, 'parent', None)
+            if parent is not None and parent.name in ('script', 'style'):
+                continue
+            if node.strip():
+                node.replaceWith(self._translate(str(node)))
+        return soup
