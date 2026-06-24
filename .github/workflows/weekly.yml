@@ -2,9 +2,10 @@ name: Weekly Delivery (Magazines, Economist)
 
 on:
   workflow_dispatch:
-  schedule:
-    # 00:00 UTC every Monday.
-    - cron: '0 0 * * 1'
+  # Scheduled delivery paused. Re-enable by uncommenting the schedule below.
+  # schedule:
+  #   # 00:00 UTC every Monday.
+  #   - cron: '0 0 * * 1'
 
 permissions:
   contents: read
